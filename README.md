@@ -1,4 +1,4 @@
-# Graph Analyzer - Sistema de Análise de Grafos em C#
+# Analisador Grafos - Sistema de Análise de Grafos em C#
 
 > **Trabalho Prático - Algoritmos em Grafos**  
 > Pontifícia Universidade Católica de Minas Gerais  
