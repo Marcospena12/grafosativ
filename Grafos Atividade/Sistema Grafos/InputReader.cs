@@ -4,32 +4,35 @@ using System.Linq;
 
 public static class InputReader
 {
-    // Detecta qual tipo de arquivo
+    // -----------------------------------------------------
+    // DETECÇÃO AUTOMÁTICA DO TIPO DE ARQUIVO
+    // -----------------------------------------------------
     public static void DetectAndRead(string path, Graph g)
     {
-        var lines = File.ReadAllLines(path).Where(l => !string.IsNullOrWhiteSpace(l)).ToList();
+        var lines = File.ReadAllLines(path)
+                        .Where(l => !string.IsNullOrWhiteSpace(l))
+                        .ToArray();
 
-        // Lista de adjacência
-        if (lines[0].Contains(":"))
+        var first = lines[0].Trim();
+        var firstParts = first.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+        if (first.Contains(":"))
         {
             ReadFromAdjList(path, g);
-            return;
         }
-
-        // Matriz (primeira linha com vários números)
-        if (lines[0].Trim().Contains(" "))
+        else if (firstParts.Length == 3)
+        {
+            ReadFromEdgeList(path, g);
+        }
+        else
         {
             ReadFromAdjMatrix(path, g);
-            return;
         }
-
-        // Lista de arestas (u v w)
-        ReadFromEdgeList(path, g);
     }
 
-    // -----------------------------
-    // LEITURA: LISTA DE ARESTAS
-    // -----------------------------
+    // -----------------------------------------------------
+    // LEITURA: LISTA DE ARESTAS (u v w)
+    // -----------------------------------------------------
     public static void ReadFromEdgeList(string path, Graph g)
     {
         g.Clear();
@@ -38,7 +41,9 @@ public static class InputReader
         {
             if (string.IsNullOrWhiteSpace(line)) continue;
 
-            var p = line.Trim().Split(" ");
+            var p = line.Trim().Split(" ", StringSplitOptions.RemoveEmptyEntries);
+            if (p.Length != 3) continue;
+
             int u = int.Parse(p[0]);
             int v = int.Parse(p[1]);
             int w = int.Parse(p[2]);
@@ -47,9 +52,10 @@ public static class InputReader
         }
     }
 
-    // -----------------------------
+    // -----------------------------------------------------
     // LEITURA: LISTA DE ADJACÊNCIA
-    // -----------------------------
+    // EX: 1: 2(w=4), 3(w=2)
+    // -----------------------------------------------------
     public static void ReadFromAdjList(string path, Graph g)
     {
         g.Clear();
@@ -65,19 +71,19 @@ public static class InputReader
 
             foreach (var n in neighbors)
             {
-                var n2 = n.Trim();
-                var idx = n2.IndexOf("(w=");
-                int v = int.Parse(n2.Substring(0, idx));
-                int w = int.Parse(n2.Substring(idx + 3).Replace(")", ""));
+                var temp = n.Trim();
+                int idx = temp.IndexOf("(w=");
+                int v = int.Parse(temp.Substring(0, idx));
+                int w = int.Parse(temp.Substring(idx + 3).Replace(")", ""));
 
                 g.AddEdge(u, v, w);
             }
         }
     }
 
-    // -----------------------------
-    // LEITURA: MATRIZ DE ADJACÊNCIA
-    // -----------------------------
+    // -----------------------------------------------------
+    // LEITURA: MATRIZ DE ADJACÊNCIA NxN
+    // -----------------------------------------------------
     public static void ReadFromAdjMatrix(string path, Graph g)
     {
         g.Clear();
@@ -91,9 +97,11 @@ public static class InputReader
         for (int i = 0; i < n; i++)
         {
             var row = lines[i].Split(" ", StringSplitOptions.RemoveEmptyEntries);
+
             for (int j = 0; j < n; j++)
             {
                 int w = int.Parse(row[j]);
+
                 if (w > 0)
                 {
                     g.AddEdge(i + 1, j + 1, w);
